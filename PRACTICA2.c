@@ -1,9 +1,9 @@
-#include <iostream>
+//#include <iostream>
 #include <mpi.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 #define nLines 9			//Número de filas de los textos cifrados
 #define nCharsPerLine 33	//Número de caracteres en cada fila de los textos cifrados
@@ -159,6 +159,7 @@ int* decipher(int line[], int key)
 	}
 
 	free(rotorKeys);
+	// hay que hacer malloc
 	return rawData;
 }
 
@@ -184,7 +185,7 @@ void enigma()
 			}
 			
 			char stringKey[nRotors + 1];
-			sprintf_s(stringKey, "%d", lineKey);
+			sprintf(stringKey, "%d", lineKey);
 			if (!strncmp(stringKey, decipheredLine, nRotors))
 			{
 				for (int idx2 = 0; idx2 < nCharsPerLine; idx2++)
@@ -205,7 +206,7 @@ void enigma()
 }
 
 //CODIGO AÑADIDO PRACTICA
-public void MPI_INIT(){
+/*public void MPI_INIT(){
 
 }
 public void MPI_Comn_Rank(){
@@ -216,7 +217,7 @@ public void MPI_Comn_Size(){
 }
 public void MPI_Finalize(){
 
-}
+}*/
 
 
 int main(int argc, char* argv[])
