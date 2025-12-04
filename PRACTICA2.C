@@ -1,10 +1,15 @@
 #include <iostream>
 #include <mpi.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+
 #define nLines 9			//Número de filas de los textos cifrados
 #define nCharsPerLine 33	//Número de caracteres en cada fila de los textos cifrados
 #define nRotors 2			//Número de rotores de enigma para cifrar y descifrar
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +222,15 @@ public void MPI_Finalize(){
 int main(int argc, char* argv[])
 {
 
-	enigma();
+	MPI_Init(&argc, &argv);
+
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    enigma();  // por ahora sigue secuencial
+
+    MPI_Finalize();
+    return 0;
 	
-	return 0;
 }
