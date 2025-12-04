@@ -1,5 +1,7 @@
 #include <iostream>
 #include <mpi.h>
+#include <stdio.h>
+#include <string.h>
 #define nLines 9			//Número de filas de los textos cifrados
 #define nCharsPerLine 33	//Número de caracteres en cada fila de los textos cifrados
 #define nRotors 2			//Número de rotores de enigma para cifrar y descifrar
@@ -196,6 +198,21 @@ void enigma()
 	printf("\n");
 	printf("\n");
 }
+
+//CODIGO AÑADIDO PRACTICA
+public void MPI_INIT(){
+
+}
+public void MPI_Comn_Rank(){
+	
+}
+public void MPI_Comn_Size(){
+	
+}
+public void MPI_Finalize(){
+
+}
+
 
 int main(int argc, char* argv[])
 {
