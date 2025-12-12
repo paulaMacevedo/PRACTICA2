@@ -132,7 +132,7 @@ void printNumbersAsString(int lines[nLines][nCharsPerLine])
 
 int* decipher(int line[], int key)
 {
-	// hemos hecho malloc, la memoria valida no desaparece por tanto va a funcionar siempre
+	// hemos hecho malloc, la memoria valida no desaparece por tanto va a funcionar siempre dddd
 	int* rawData = (int*)malloc(sizeof(int) * nCharsPerLine);
 
 	for (int idx = 0; idx < nCharsPerLine; idx++)
