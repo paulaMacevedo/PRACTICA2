@@ -132,8 +132,10 @@ void printNumbersAsString(int lines[nLines][nCharsPerLine])
 
 int* decipher(int line[], int key)
 {
-	// la memoria estática desaparece cuando finaliza la función mienstras que la dinamica (malloc) se guarda siempre el valor aunque termine, 
-	//por tanto para que desaparezca si la volvemos a llamar desde otra función siga teniendo ese valor.
+	// la memoria estática desaparece cuando finaliza la función mienstras que 
+	//la dinamica (malloc) se guarda siempre el valor aunque termine, 
+	//por tanto para que desaparezca si la volvemos a llamar 
+	//desde otra función siga teniendo ese valor.
 	int* rawData = (int*)malloc(sizeof(int) * nCharsPerLine);
 
 	for (int idx = 0; idx < nCharsPerLine; idx++)
@@ -165,7 +167,8 @@ int* decipher(int line[], int key)
 	return rawData;
 }
 
-// decide que lineas descifrar del texto sabiendo que soy el alumno rank del size, dime en que linea estoy
+// decide que lineas descifrar del texto sabiendo 
+//que soy el alumno rank del size, dime en que linea estoy
 // como actualizamos cabezer actualizamos llamadas.
 void enigma(int rank, int size)
 {
@@ -181,16 +184,6 @@ void enigma(int rank, int size)
 		printf("DESCIFRANDO...: \n");
 	}
 
-	/*
-	//AÑADIDO
-	//SABER QUIEN SOY DE LA CLASE
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	// SABER CUANTOS ALUMNOS HAY CLASE
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
-	// LA MPI_COMM_WORLD
-	*/
-	
-
 	
 	int deciphered[nLines][nCharsPerLine];
 	//INCIACILIZA LA MATRIZ A 0 PARA PODER LLENARLA
@@ -198,7 +191,8 @@ void enigma(int rank, int size)
 	for (int idx = rank; idx < nLines; idx+= size) //ejemplo 9 caramelos 4 niños
 	{
 		// bucle que busca las claves 
-		for (int lineKey = (int)pow(10, nRotors - 1); lineKey < (int)pow(10, nRotors); lineKey++)
+		for (int lineKey = (int)pow(10, nRotors - 1); lineKey < (int)pow(10, nRotors); 
+				lineKey++)
 		{
 			int* lineaDescifrada = decipher(ciphered[idx], lineKey);
 			
@@ -222,10 +216,13 @@ void enigma(int rank, int size)
 		}
 	}
 	
-	// actúa como barrera ciclica, hasta que todos los procesos no hallan realizado una vuelta, no puede comenzar la siguiente (asignar un valor a cada proceso)
+	// actúa como barrera ciclica, hasta que todos los procesos no 
+	//hallan realizado una vuelta, no puede comenzar la siguiente 
+	//(asignar un valor a cada proceso)
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	//como rank 0 no puede ver el descifrado de los otros ranks, estos se lo tienen que mandar con MPI_SEND
+	//como rank 0 no puede ver el descifrado de los otros ranks, 
+	//estos se lo tienen que mandar con MPI_SEND
 	if (rank != 0) {
         MPI_Send(deciphered, nLines * nCharsPerLine, MPI_INT, 0, 0, MPI_COMM_WORLD);
 		// 1 lo que quieres enviar, el descifrado de tu parte
@@ -241,7 +238,8 @@ void enigma(int rank, int size)
         for (int p = 1; p < size; p++) {
 			// Empieza en p = 1 porque rank 0 no se recibe a sí mismo.
 			//Llega hasta size - 1, es decir, todos los demás procesos.
-            int matrizResultadosTemp[nLines][nCharsPerLine]; // mastriz donde va guardar los descifrados de los ranks
+            int matrizResultadosTemp[nLines][nCharsPerLine]; 
+			// mastriz donde va guardar los descifrados de los ranks
 			
             MPI_Recv(matrizResultadosTemp, nLines * nCharsPerLine, MPI_INT, p, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			/*
@@ -261,10 +259,13 @@ void enigma(int rank, int size)
 			*/
             // Fusionar resultados (solo sobrescribir líneas no vacías)
             for (int i = 0; i < nLines; i++)
-			// si es 0 = no descifrado si no 0 = DESCIFRADO, el resultado descifrado lo guardamos en la matriz
+			// si es 0 = no descifrado si no 0 = DESCIFRADO, 
+			//	el resultado descifrado lo guardamos en la matriz
                 if (matrizResultadosTemp[i][0] != 0)
-                    memcpy(deciphered[i], matrizResultadosTemp[i], nCharsPerLine * sizeof(int));
-					//deciphered es la que almacena los resulatdos finales q le va pasamndo temp q su vez le va pasando rank 0 que le va pasando cada rank
+                    memcpy(deciphered[i], matrizResultadosTemp[i],	
+							 nCharsPerLine * sizeof(int));
+					//deciphered es la que almacena los resulatdos finales q le va pasamndo temp 
+					//q su vez le va pasando rank 0 que le va pasando cada rank
         }
 		
 	}
@@ -286,7 +287,8 @@ void enigma(int rank, int size)
 
 int main(int argc, char* argv[])
 {
-	// MPI necesita inicializar todas las estructuras internas para que los procesos se comuniquen
+	// MPI necesita inicializar todas las estructuras internas 
+	//para que los procesos se comuniquen
 	MPI_Init(&argc, &argv);
 
 
