@@ -132,7 +132,8 @@ void printNumbersAsString(int lines[nLines][nCharsPerLine])
 
 int* decipher(int line[], int key)
 {
-	// hemos hecho malloc, la memoria valida no desaparece por tanto va a funcionar siempre dddd
+	// la memoria estática desaparece cuando finaliza la función mienstras que la dinamica (malloc) se guarda siempre el valor aunque termine, 
+	//por tanto para que desaparezca si la volvemos a llamar desde otra función siga teniendo ese valor.
 	int* rawData = (int*)malloc(sizeof(int) * nCharsPerLine);
 
 	for (int idx = 0; idx < nCharsPerLine; idx++)
@@ -160,28 +161,51 @@ int* decipher(int line[], int key)
 	}
 
 	free(rotorKeys);
+	// valor descifrado (se resta para descifrar y se suma para cifrar)
 	return rawData;
 }
 
-void enigma()
+// decide que lineas descifrar del texto sabiendo que soy el alumno rank del size, dime en que linea estoy
+// como actualizamos cabezer actualizamos llamadas.
+void enigma(int rank, int size)
 {
-	printf("ESTO ES LA ENTRADA: \n");
-	printNumbersAsString(ciphered);
-	printf("\n");
-	printf("\n");
+	//numero/identificación de proceso -> RANK
+	// cuantos procesos estan ejecutándose-> SIZE
+	
+	//rank 0 representante de todos los rank y por tanto es el que imprime
+	if (rank == 0){
+		printf("ESTO ES LA ENTRADA: \n");
+		printNumbersAsString(ciphered);
+		printf("\n");
+		printf("\n");
+		printf("DESCIFRANDO...: \n");
+	}
 
-	printf("DESCIFRANDO...: \n");
+	/*
+	//AÑADIDO
+	//SABER QUIEN SOY DE LA CLASE
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	// SABER CUANTOS ALUMNOS HAY CLASE
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	// LA MPI_COMM_WORLD
+	*/
+	
+
+	
 	int deciphered[nLines][nCharsPerLine];
-	for (int idx = 0; idx < nLines; idx++)
+	//INCIACILIZA LA MATRIZ A 0 PARA PODER LLENARLA
+	memset(deciphered,0,sizeof(deciphered));
+	for (int idx = rank; idx < nLines; idx+= size) //ejemplo 9 caramelos 4 niños
 	{
+		// bucle que busca las claves 
 		for (int lineKey = (int)pow(10, nRotors - 1); lineKey < (int)pow(10, nRotors); lineKey++)
 		{
-			int* p_deciphered = decipher(ciphered[idx], lineKey);
+			int* lineaDescifrada = decipher(ciphered[idx], lineKey);
 			
 			char decipheredLine[nCharsPerLine];
 			for (int idx = 0; idx < nCharsPerLine; idx++)
 			{
-				decipheredLine[idx] = p_deciphered[idx];
+				decipheredLine[idx] = lineaDescifrada[idx];
 			}
 			
 			char stringKey[nRotors + 1];
@@ -198,38 +222,79 @@ void enigma()
 		}
 	}
 	
-	printf("\n");
-	printf("ESTO ES LA SALIDA:\n");
-	printNumbersAsString(deciphered);
-	printf("\n");
-	printf("\n");
-}
+	// actúa como barrera ciclica, hasta que todos los procesos no hallan realizado una vuelta, no puede comenzar la siguiente (asignar un valor a cada proceso)
+	MPI_Barrier(MPI_COMM_WORLD);
 
-//CODIGO AÑADIDO PRACTICA
-/*public void MPI_INIT(){
+	//como rank 0 no puede ver el descifrado de los otros ranks, estos se lo tienen que mandar con MPI_SEND
+	if (rank != 0) {
+        MPI_Send(deciphered, nLines * nCharsPerLine, MPI_INT, 0, 0, MPI_COMM_WORLD);
+		// 1 lo que quieres enviar, el descifrado de tu parte
+		//2  el tamaño de lo que quieres enviar lineas * elementos de lineas
+		//3 tipo de datos a enviar--> enteros
+		//4 a quien se lo mandas --> rank 0
+		//5 etiqueta del Send, que cosa quieres enviar 0 lienas, 1 clave, 2 contraseña
+		//6 clase donde estan todos los rank
+    }
+	// UNA VEZ ENVIADO EL RANK 0 TIENE QUE RECIBIRLO Y ALMACENARLO
+	   else {
+        // Recibir resultados de todos los ranks
+        for (int p = 1; p < size; p++) {
+			// Empieza en p = 1 porque rank 0 no se recibe a sí mismo.
+			//Llega hasta size - 1, es decir, todos los demás procesos.
+            int matrizResultadosTemp[nLines][nCharsPerLine]; // mastriz donde va guardar los descifrados de los ranks
+			
+            MPI_Recv(matrizResultadosTemp, nLines * nCharsPerLine, MPI_INT, p, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			/*
+				matrizResultados → dónde guardar lo que envían en la matriz
 
-}
-public void MPI_Comn_Rank(){
+				nLines * nCharsPerLine → cuántos ints recibimos
+
+				MPI_INT → tipo de dato
+
+				p → de qué alumno (rank)
+
+				0 → etiqueta del mensaje
+
+				MPI_COMM_WORLD → el grupo de la clase
+
+				MPI_STATUS_IGNORE → no me importa info adicional
+			*/
+            // Fusionar resultados (solo sobrescribir líneas no vacías)
+            for (int i = 0; i < nLines; i++)
+			// si es 0 = no descifrado si no 0 = DESCIFRADO, el resultado descifrado lo guardamos en la matriz
+                if (matrizResultadosTemp[i][0] != 0)
+                    memcpy(deciphered[i], matrizResultadosTemp[i], nCharsPerLine * sizeof(int));
+					//deciphered es la que almacena los resulatdos finales q le va pasamndo temp q su vez le va pasando rank 0 que le va pasando cada rank
+        }
+		
+	}
+
+
+	//rank 0 representante de todos los rank y por tanto es el que imprime
+	if (rank == 0){
+		printf("\n");
+		printf("ESTO ES LA SALIDA:\n");
+			printNumbersAsString(deciphered);
+			printf("\n");
+			printf("\n");
+	}
+
 	
 }
-public void MPI_Comn_Size(){
-	
-}
-public void MPI_Finalize(){
 
-}*/
 
 
 int main(int argc, char* argv[])
 {
-
+	// MPI necesita inicializar todas las estructuras internas para que los procesos se comuniquen
 	MPI_Init(&argc, &argv);
+
 
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    enigma();  // por ahora sigue secuencial
+    enigma(rank,size);  // por ahora sigue secuencial
 
     MPI_Finalize();
     return 0;
