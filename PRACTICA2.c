@@ -241,7 +241,8 @@ void enigma(int rank, int size)
             int matrizResultadosTemp[nLines][nCharsPerLine]; 
 			// mastriz donde va guardar los descifrados de los ranks
 			
-            MPI_Recv(matrizResultadosTemp, nLines * nCharsPerLine, MPI_INT, p, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(matrizResultadosTemp, nLines * nCharsPerLine, MPI_INT, p, 0,
+						 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			/*
 				matrizResultados → dónde guardar lo que envían en la matriz
 
