@@ -274,6 +274,7 @@ void enigma(int rank, int size)
 
 	//rank 0 representante de todos los rank y por tanto es el que imprime
 	if (rank == 0){
+
 		printf("\n");
 		printf("ESTO ES LA SALIDA:\n");
 			printNumbersAsString(deciphered);
@@ -299,6 +300,7 @@ int main(int argc, char* argv[])
 
     enigma(rank,size);  // por ahora sigue secuencial
 
+	// finalizamos
     MPI_Finalize();
     return 0;
 	
